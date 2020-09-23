@@ -25,12 +25,12 @@ namespace ASG_Leaderboard_Project
         {
             Season season = new Season()
             {
-                id = Guid.NewGuid(),
-                name = seasonName,
-                currentEventIndex = 0,
-                events = new List<Event>(),
-                drivers = new List<Driver>(),
-                standings = new List<KeyValuePair<Guid, int>>()
+                Id = Guid.NewGuid(),
+                Name = seasonName,
+                CurrentEventIndex = 0,
+                Events = new List<Event>(),
+                Drivers = new List<Driver>(),
+                Standings = new List<KeyValuePair<Guid, int>>()
             };
 
             return await _repo.CreateSeason(season);
