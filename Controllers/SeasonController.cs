@@ -35,5 +35,19 @@ namespace ASG_Leaderboard_Project
 
             return await _repo.CreateSeason(season);
         }
+
+        [HttpGet("/seasons/get/{id}")]
+        public async Task<Season> GetSeason(Guid id)
+        {
+            return await _repo.GetSeason(id);
+        }
+
+
+
+        [HttpGet("/seasons/getall")]
+        public async Task<Season[]> GetAllSeasons()
+        {
+            return await _repo.GetAllSeasons();
+        }
     }
 }

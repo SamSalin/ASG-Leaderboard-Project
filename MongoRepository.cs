@@ -33,5 +33,19 @@ namespace ASG_Leaderboard_Project
             await _seasonCollection.InsertOneAsync(season);
             return season;
         }
+
+        public async Task<Season> GetSeason(Guid id)
+        {
+            var filter = Builders<Season>.Filter.Eq(s => s.id, id);
+            var season = await _seasonCollection.Find(filter).FirstAsync();
+            return season;
+        }
+
+        public async Task<Season[]> GetAllSeasons()
+        {
+            var seasons = await _seasonCollection.Find(new BsonDocument()).ToListAsync();
+            return seasons.ToArray();
+        }
+
     }
 }
