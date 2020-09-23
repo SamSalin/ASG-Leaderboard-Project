@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 
-namespace ASG_Leaderboard_Project.Models
+namespace ASG_Leaderboard_Project
 {
     public class Event
     {
-        Guid id;
-        DateTime date;
-        string name;
-        Track track;
-        List<KeyValuePair<Guid, int>> standings;
+        public Guid id;
+        public DateTime date;
+        public string name;
+        public Track track;
+        public List<KeyValuePair<Guid, int>> standings;
     }
 }

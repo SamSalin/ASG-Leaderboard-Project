@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
 
-namespace ASG_Leaderboard_Project.Models
+namespace ASG_Leaderboard_Project
 {
     public class Season
     {
-        Guid id;
-        string name;
-        int nextLevelIndex;                             //Check which event is up next in the season
-        List<Event> events;
-        List<Driver> drivers;
-        List<KeyValuePair<Guid, int>> standings;      //Is it the best possible solution?
+        public Guid id;
+        public string name;
+        public int currentEventIndex;                             //Check which event is up next in the season
+        public List<Event> events;
+        public List<Driver> drivers;
+        public List<KeyValuePair<Guid, int>> standings;      //Is it the best possible solution?
 
     }
 }

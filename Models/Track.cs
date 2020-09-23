@@ -1,13 +1,13 @@
 using System;
 
-namespace ASG_Leaderboard_Project.Models
+namespace ASG_Leaderboard_Project
 {
     public class Track
     {
-        Guid id;
-        DateTime date;
-        string name;
-        string country;
+        public Guid id;
+        public DateTime date;
+        public string name;
+        public string country;
 
     }
 }
