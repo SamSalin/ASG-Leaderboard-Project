@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
-using MongoDB.Driver;
 
-namespace ASG_Leaderboard_Project
+namespace ASG_Leaderboard_Project.Controllers
 {
 
     [ApiController]
@@ -23,6 +21,7 @@ namespace ASG_Leaderboard_Project
         [HttpPost("/seasons/create")]
         public async Task<Season> CreateSeason([FromQuery] string seasonName)
         {
+
             Season season = new Season()
             {
                 Id = Guid.NewGuid(),
@@ -41,8 +40,6 @@ namespace ASG_Leaderboard_Project
         {
             return await _repo.GetSeason(id);
         }
-
-
 
         [HttpGet("/seasons/getall")]
         public async Task<Season[]> GetAllSeasons()
