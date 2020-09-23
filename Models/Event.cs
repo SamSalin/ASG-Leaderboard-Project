@@ -5,10 +5,10 @@ namespace ASG_Leaderboard_Project
 {
     public class Event
     {
-        public Guid id;
-        public DateTime date;
-        public string name;
-        public Track track;
-        public List<KeyValuePair<Guid, int>> standings;
+        public Guid Id;
+        public DateTime Date;
+        public string Name;
+        public Track Track;
+        public List<KeyValuePair<Guid, int>> Standings;
     }
 }

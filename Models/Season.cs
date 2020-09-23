@@ -5,12 +5,12 @@ namespace ASG_Leaderboard_Project
 {
     public class Season
     {
-        public Guid id;
-        public string name;
-        public int currentEventIndex;                             //Check which event is up next in the season
-        public List<Event> events;
-        public List<Driver> drivers;
-        public List<KeyValuePair<Guid, int>> standings;      //Is it the best possible solution?
+        public Guid Id;
+        public string Name;
+        public int CurrentEventIndex;                             //Check which event is up next in the season
+        public List<Event> Events;
+        public List<Driver> Drivers;
+        public List<KeyValuePair<Guid, int>> Standings;      //Is it the best possible solution?
 
     }
 }

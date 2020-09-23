@@ -4,10 +4,10 @@ namespace ASG_Leaderboard_Project
 {
     public class Track
     {
-        public Guid id;
-        public DateTime date;
-        public string name;
-        public string country;
+        public Guid Dd;
+        public DateTime Date;
+        public string Name;
+        public string Country;
 
     }
 }

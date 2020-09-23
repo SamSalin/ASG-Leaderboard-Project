@@ -23,7 +23,7 @@ namespace ASG_Leaderboard_Project
             var mongoClient = new MongoClient("mongodb://localhost:27017");
             var database = mongoClient.GetDatabase("asg");
             _seasonCollection = database.GetCollection<Season>("seasons");
-            _bsonDocumentCollection = database.GetCollection<BsonDocument>("players");
+            _bsonDocumentCollection = database.GetCollection<BsonDocument>("seasons");
         }
 
         // Season methods
@@ -36,7 +36,7 @@ namespace ASG_Leaderboard_Project
 
         public async Task<Season> GetSeason(Guid id)
         {
-            var filter = Builders<Season>.Filter.Eq(s => s.id, id);
+            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
             var season = await _seasonCollection.Find(filter).FirstAsync();
             return season;
         }
