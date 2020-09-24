@@ -2,9 +2,8 @@ using System;
 
 namespace ASG_Leaderboard_Project
 {
-    public class Track
+    public class NewTrack
     {
-        public Guid Id { get; set; }
 
         public string Name { get; set; }
 

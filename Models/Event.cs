@@ -7,9 +7,9 @@ namespace ASG_Leaderboard_Project
     {
         public Guid Id { get; set; }
 
-        public DateTime Date { get; set; }
-
         public string Name { get; set; }
+
+        public DateTime Date { get; set; }
 
         public Track Track { get; set; }
 
