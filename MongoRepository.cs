@@ -31,18 +31,9 @@ namespace ASG_Leaderboard_Project
             _bsonDocumentCollection = database.GetCollection<BsonDocument>("seasons");
         }
 
-        // Season CRUD
-
         public async Task<Season> CreateSeason(Season season)
         {
             await _seasonCollection.InsertOneAsync(season);
-            return season;
-        }
-
-        public async Task<Season> GetSeason(Guid id)
-        {
-            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
-            var season = await _seasonCollection.Find(filter).FirstAsync();
             return season;
         }
 
@@ -55,19 +46,55 @@ namespace ASG_Leaderboard_Project
             return Task.FromResult(createdEvent);
         }
 
-        public async Task<Event> GetSeasonEvent(Guid seasonId, Guid eventId)
+        public Track CreateTrack(ModifiedTrack modifiedTrack)
         {
-            var filter = Builders<Season>.Filter.ElemMatch<Event>(s => s.Events, e => e.Id == eventId);
-            var search = await _seasonCollection.Find(filter).FirstAsync();
+            Track track = new Track()
+            {
+                Id = Guid.NewGuid(),
+                Name = modifiedTrack.Name,
+                Country = modifiedTrack.Country
+            };
 
-            return search.Events.FirstOrDefault(e => e.Id == eventId);
+            return track;
+        }
 
+        public async Task<Season> GetSeason(Guid id)
+        {
+            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
+            var season = await _seasonCollection.Find(filter).FirstAsync();
+            return season;
         }
 
         public async Task<Season[]> GetAllSeasons()
         {
             var seasons = await _seasonCollection.Find(new BsonDocument()).ToListAsync();
             return seasons.ToArray();
+        }
+
+        public async Task<Event> GetSeasonEvent(Guid seasonId, Guid eventId)
+        {
+            var filter = Builders<Season>.Filter.ElemMatch<Event>(s => s.Events, e => e.Id == eventId);
+            var search = await _seasonCollection.Find(filter).FirstAsync();
+
+            return search.Events.FirstOrDefault(e => e.Id == eventId);
+        }
+
+        public async Task<Event> ModifySeasonEvent(Guid seasonid, Guid eventId, Event modifiedEvent)
+        {
+            var filter = Builders<Season>.Filter.Where(s => s.Id == seasonid && s.Events.Any(e => e.Id == eventId));
+            var replace = Builders<Season>.Update.Set(e => e.Events[-1], modifiedEvent);
+
+            await _seasonCollection.UpdateOneAsync(filter, replace);
+
+            return modifiedEvent;
+        }
+
+        public async Task<Season> ModifySeasonIndex(Guid id, int index)
+        {
+            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
+            var update = Builders<Season>.Update.Set("CurrentEventIndex", index);
+
+            return await _seasonCollection.FindOneAndUpdateAsync(filter, update, options);
         }
 
         public async Task<Season> DeleteSeason(Guid id)
@@ -77,19 +104,6 @@ namespace ASG_Leaderboard_Project
 
             await _seasonCollection.FindOneAndDeleteAsync(filter);
             return deletedSeason;
-        }
-
-        internal Task<Season> ModifySeasonEvent(Guid seasonid, Guid eventId, ModifiedEvent modifiedEvent)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<Season> ModifySeasonIndex(Guid id, int index)
-        {
-            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
-            var update = Builders<Season>.Update.Set("CurrentEventIndex", index);
-
-            return await _seasonCollection.FindOneAndUpdateAsync(filter, update, options);
         }
     }
 }
