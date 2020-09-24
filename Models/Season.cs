@@ -14,7 +14,7 @@ namespace ASG_Leaderboard_Project
 
         public List<Driver> Drivers { get; set; }
 
-        public List<KeyValuePair<Guid, int>> Standings { get; set; } //Is it the best possible solution?
+        public List<KeyValuePair<Driver, int>> Standings { get; set; } //Driver = driver from season, int = accumulated points throughout season
 
     }
 }

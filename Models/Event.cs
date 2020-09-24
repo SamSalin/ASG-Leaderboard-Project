@@ -13,7 +13,7 @@ namespace ASG_Leaderboard_Project
 
         public Track Track { get; set; }
 
-        public List<KeyValuePair<Guid, int>> Standings { get; set; }
+        public List<KeyValuePair<Driver, int>> Standings { get; set; }  //Driver = driver from event, int = points from the event
 
     }
 }

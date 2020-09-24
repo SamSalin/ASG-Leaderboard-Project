@@ -29,7 +29,7 @@ namespace ASG_Leaderboard_Project.Controllers
                 CurrentEventIndex = 0,
                 Events = new List<Event>(),
                 Drivers = new List<Driver>(),
-                Standings = new List<KeyValuePair<Guid, int>>()
+                Standings = new List<KeyValuePair<Driver, int>>()
             };
 
             return await _repo.CreateSeason(season);
