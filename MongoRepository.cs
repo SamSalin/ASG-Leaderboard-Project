@@ -58,6 +58,17 @@ namespace ASG_Leaderboard_Project
             return track;
         }
 
+        internal Task<Driver[]> CreateDrivers(Guid id, List<Driver> driverList)
+        {
+            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
+            var push = Builders<Season>.Update.PushEach("Drivers", driverList);
+            _seasonCollection.FindOneAndUpdateAsync(filter, push);
+
+            //Every time we create new drivers, we should update the season standings
+
+            return Task.FromResult(driverList.ToArray());
+        }
+
         public async Task<Season> GetSeason(Guid id)
         {
             var filter = Builders<Season>.Filter.Eq(s => s.Id, id);

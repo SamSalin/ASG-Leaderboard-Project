@@ -37,6 +37,25 @@ namespace ASG_Leaderboard_Project.Controllers
             return await _repo.CreateSeason(season);
         }
 
+        [HttpPost("/seasons/{id}/drivers/create")]
+        public async Task<Driver[]> CreateDrivers(Guid id, [FromBody] ModifiedDriver[] drivers)
+        {
+            List<Driver> driverList = new List<Driver>();
+
+            foreach (ModifiedDriver driver in drivers)
+            {
+                Driver tempDriver = new Driver();
+                tempDriver.Id = Guid.NewGuid();
+                tempDriver.Name = driver.Name;
+                tempDriver.Nationality = driver.Nationality;
+                tempDriver.Team = driver.Team;
+                driverList.Add(tempDriver);
+            }
+
+            return await _repo.CreateDrivers(id, driverList);
+
+        }
+
         [HttpPost("/seasons/{id}/event/create")]
         public async Task<Event> CreateEvent(Guid id, [FromBody] ModifiedEvent modifiedEvent)
         {
