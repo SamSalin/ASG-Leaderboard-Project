@@ -58,15 +58,16 @@ namespace ASG_Leaderboard_Project
             return track;
         }
 
-        internal Task<Driver[]> CreateDrivers(Guid id, List<Driver> driverList)
+        public async Task<Driver[]> CreateDrivers(Guid id, List<Driver> driverList)
         {
             var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
             var push = Builders<Season>.Update.PushEach("Drivers", driverList);
-            _seasonCollection.FindOneAndUpdateAsync(filter, push);
+            await _seasonCollection.FindOneAndUpdateAsync(filter, push);
 
             //Every time we create new drivers, we should update the season standings
+            await AddToSeasonStandings(id, driverList);
 
-            return Task.FromResult(driverList.ToArray());
+            return driverList.ToArray();
         }
 
         public async Task<Season> GetSeason(Guid id)
@@ -106,6 +107,23 @@ namespace ASG_Leaderboard_Project
             var update = Builders<Season>.Update.Set("CurrentEventIndex", index);
 
             return await _seasonCollection.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        public async Task<Season> AddToSeasonStandings(Guid id, List<Driver> driverList)
+        {
+            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
+            var search = await _seasonCollection.Find(filter).FirstAsync();
+            List<KeyValuePair<Driver, int>> standings = search.Standings;
+
+            for (int i = 0; i < driverList.Count; i++)
+            {
+                standings.Add(new KeyValuePair<Driver, int>(driverList[i], default));
+            }
+
+            var replacement = Builders<Season>.Update.Set("Standings", standings);
+            await _seasonCollection.FindOneAndUpdateAsync(filter, replacement);
+
+            return await _seasonCollection.FindOneAndUpdateAsync(filter, replacement, options);
         }
 
         public async Task<Season> DeleteSeason(Guid id)
