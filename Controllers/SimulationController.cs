@@ -31,14 +31,14 @@ namespace ASG_Leaderboard_Project.Controllers
         {
             return await _repo.SimulateNextEvent(id);
         }
-        [HttpGet("/simulate/season/{seasonId}/standings")]
+        [HttpGet("/simulate/season/{id}/standings")]
         public async Task<List<string>> GetSeasonStandings(Guid id)
         {
             return await _repo.GetSeasonStandings(id);
         }
 
         [HttpGet("/simulate/season/{seasonId}/event/{eventId}/standings")]
-        public async Task<List<string>> GetSeasonStandings(Guid seasonId, Guid eventId)
+        public async Task<List<string>> GetEventStandings(Guid seasonId, Guid eventId)
         {
             return await _repo.GetEventStandings(seasonId, eventId);
         }

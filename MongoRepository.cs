@@ -172,6 +172,7 @@ namespace ASG_Leaderboard_Project
             List<string> finalList = new List<string>();
 
             standingsList.Sort((x, y) => x.Value.CompareTo(y.Value));
+            standingsList.Reverse();
 
             foreach (var item in standingsList)
             {
@@ -189,6 +190,7 @@ namespace ASG_Leaderboard_Project
             List<string> finalList = new List<string>();
 
             standingsList.Sort((x, y) => x.Value.CompareTo(y.Value));
+            standingsList.Reverse();
 
             foreach (var item in standingsList)
             {
