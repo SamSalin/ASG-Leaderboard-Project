@@ -20,18 +20,11 @@ namespace ASG_Leaderboard_Project.Controllers
 
         // ------------ SIMULATION FUNCTIONS----------------------
 
-
-
-
-
-
-
-
-
-
-
-
-
+        [HttpGet("/simulate/season/{id}")]
+        public async Task<String> SimulateNextEvent(Guid id)
+        {
+            return await _repo.SimulateNextEvent(id);
+        }
         [HttpGet("/simulate/season/{seasonId}/standings")]
         public async Task<List<string>> GetSeasonStandings(Guid id)
         {

@@ -11,6 +11,7 @@ namespace ASG_Leaderboard_Project
     {
         private readonly IMongoCollection<Season> _seasonCollection;
         private readonly IMongoCollection<BsonDocument> _bsonDocumentCollection;
+        private static Random rng = new Random();
 
         FindOneAndUpdateOptions<Season> options = new FindOneAndUpdateOptions<Season>()
         {
@@ -66,6 +67,7 @@ namespace ASG_Leaderboard_Project
 
             //Every time we create new drivers, we should update the season standings
             await AddToSeasonStandings(id, driverList);
+            //await AddToEventStandings(id, driverList);
 
             return driverList.ToArray();
         }
@@ -133,6 +135,25 @@ namespace ASG_Leaderboard_Project
             return await _seasonCollection.FindOneAndUpdateAsync(filter, replacement, options);
         }
 
+        public async Task<Season> AddToEventStandings(Guid id, List<Driver> driverList)
+        {
+            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
+            var search = await _seasonCollection.Find(filter).FirstAsync();
+
+            for (int j = 0; j < search.Events.Count; j++)
+            {
+                for (int i = 0; i < driverList.Count; i++)
+                {
+                    search.Events[j].Standings.Add(new KeyValuePair<Driver, int>(driverList[i], default));
+                }
+            }
+
+            var replacement = Builders<Season>.Update.Set("Events", search.Events);
+            await _seasonCollection.FindOneAndUpdateAsync(filter, replacement);
+
+            return await _seasonCollection.FindOneAndUpdateAsync(filter, replacement, options);
+        }
+
         public async Task<Season> DeleteSeason(Guid id)
         {
             var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
@@ -142,11 +163,13 @@ namespace ASG_Leaderboard_Project
             return deletedSeason;
         }
 
+        //-----------------Simulation----------------
+
         public async Task<List<string>> GetSeasonStandings(Guid seasonId)
         {
             var season = await GetSeason(seasonId);
             var standingsList = season.Standings;
-            List<string> finalList =  new List<string>();
+            List<string> finalList = new List<string>();
 
             standingsList.Sort((x, y) => x.Value.CompareTo(y.Value));
 
@@ -155,7 +178,7 @@ namespace ASG_Leaderboard_Project
                 string tempString = item.Key.Name + ": " + item.Value.ToString();
                 finalList.Add(tempString);
             }
-            
+
             return finalList;
         }
 
@@ -163,7 +186,7 @@ namespace ASG_Leaderboard_Project
         {
             var tempEvent = await GetSeasonEvent(seasonId, eventId);
             var standingsList = tempEvent.Standings;
-            List<string> finalList =  new List<string>();
+            List<string> finalList = new List<string>();
 
             standingsList.Sort((x, y) => x.Value.CompareTo(y.Value));
 
@@ -172,8 +195,87 @@ namespace ASG_Leaderboard_Project
                 string tempString = item.Key.Name + ": " + item.Value.ToString();
                 finalList.Add(tempString);
             }
-            
+
             return finalList;
+        }
+
+        public async Task<string> LastEvent(Guid id)
+        {
+            int sija = 0;
+            int lastEventIndex = await GetCurrentEventIndex(id) - 1;
+            if (lastEventIndex < 2)
+            {
+                //tämä estää errorin tässä vaiheessa
+                lastEventIndex = 0;
+
+
+                //error tähän, ei aiempia kilpailuita
+                //return null;
+            }
+
+            var season = await GetSeason(id);
+
+            List<KeyValuePair<Driver, int>> standings = season.Events[lastEventIndex].Standings;
+
+            Console.WriteLine("Last event: " + season.Events[lastEventIndex].Name + " Date: " + season.Events[lastEventIndex].Date);
+            for (int i = 0; i < season.Standings.Count; i++)
+            {
+                sija = 1 + i;
+                Console.WriteLine(sija + ". " + standings[i].Key.Name + " , Points: " + standings[i].Value);
+            }
+
+
+            return null;
+        }
+        public async Task<string> SimulateNextEvent(Guid id)
+        {
+            Season season = await GetSeason(id);
+            List<KeyValuePair<Driver, int>> updatedStandings = CalculateResults(season.Drivers);
+            Console.WriteLine(season.Events[0].Standings[0].Value);
+
+            for (int i = 0; i < updatedStandings.Count; i++)
+            {
+                Console.WriteLine("Driver: " + updatedStandings[i].Key.Name + ", Points: " + updatedStandings[i].Value);
+            }
+
+            return null;
+        }
+
+        public List<KeyValuePair<Driver, int>> CalculateResults(List<Driver> drivers)
+        {
+            Int32 points;
+            Int32[] pointsForPlacements = new Int32[] { 25, 18, 15, 12, 10, 8, 6, 4, 2, 1 };
+            List<KeyValuePair<Driver, int>> updatedStandings = new List<KeyValuePair<Driver, int>>();
+            Shuffle(drivers);
+
+            for (int i = 0; i < drivers.Count; i++)
+            {
+                if (i < 9)
+                {
+                    points = pointsForPlacements[i];
+                }
+                else
+                {
+                    points = 0;
+                }
+
+                updatedStandings.Add(new KeyValuePair<Driver, int>(drivers[i], points));
+            }
+
+            return updatedStandings;
+        }
+
+        public static void Shuffle(List<Driver> drivers)
+        {
+            int n = drivers.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                Driver value = drivers[k];
+                drivers[k] = drivers[n];
+                drivers[n] = value;
+            }
         }
     }
 }
