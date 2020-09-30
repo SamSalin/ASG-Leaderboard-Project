@@ -26,6 +26,12 @@ namespace ASG_Leaderboard_Project.Controllers
             return await _repo.LastEvent(seasonId);
         }
 
+        [HttpGet("/simulate/season/{seasonId}/nextevent")]
+        public async Task<string> NextEvent(Guid seasonId)
+        {
+            return await _repo.NextEvent(seasonId);
+        }
+
         [HttpGet("/simulate/season/{id}")]
         public async Task<String> SimulateNextEvent(Guid id)
         {

@@ -232,6 +232,24 @@ namespace ASG_Leaderboard_Project
 
             return list;
         }
+
+        public async Task<string> NextEvent(Guid seasonId)
+        {
+            Season tmpSeason = await GetSeason(seasonId);
+            int nextEventIndex = await GetCurrentEventIndex(seasonId);
+            string tempString;
+            if(nextEventIndex < tmpSeason.Events.Count)
+            {
+                var tmpEvent = tmpSeason.Events[nextEventIndex];
+                tempString = tmpEvent.Name + "\nTrack: " + tmpEvent.Track.Name + "  " + tmpEvent.Track.Country + "\nDate: " + tmpEvent.Date.ToString("ddd, dd MMM yyy HH’:’mm’:’ss ‘GMT’");
+            }
+            else { tempString = "No more events in this season!"; }
+
+            return tempString;
+        }
+
+
+
         public async Task<string> SimulateNextEvent(Guid id)
         {
             Season season = await GetSeason(id);
