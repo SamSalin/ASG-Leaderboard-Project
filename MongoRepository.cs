@@ -234,16 +234,16 @@ namespace ASG_Leaderboard_Project
         }
         public async Task<string> SimulateNextEvent(Guid id)
         {
-            string returnString = "";
-
             Season season = await GetSeason(id);
 
+            string returnString = "";
             returnString += ("Simulating event " + (season.CurrentEventIndex + 1) + ": " + season.Events[season.CurrentEventIndex].Name + "!\n");
             returnString += ("Results of the event were:\n");
 
             List<KeyValuePair<Driver, int>> updatedStandings = CalculateResults(season.Drivers);
             season.Events[season.CurrentEventIndex].Standings = updatedStandings;
 
+            // For return print
             for (int i = 0; i < updatedStandings.Count; i++)
             {
                 returnString += "\n" + (i + 1) + ". " + updatedStandings[i].Key.Name + " - " + updatedStandings[i].Value + " points";
@@ -251,13 +251,11 @@ namespace ASG_Leaderboard_Project
 
             // Update events in document
             var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
-            var eventReplacement = Builders<Season>.Update.Set("Events", season.Events);
-            await _seasonCollection.FindOneAndUpdateAsync(filter, eventReplacement);
 
-            //Update currentlevelindex in document
+            //Update CurrentLevelIndex in document
             season.CurrentEventIndex++;
-            var eventIndexReplacement = Builders<Season>.Update.Set("CurrentEventIndex", season.CurrentEventIndex);
-            await _seasonCollection.FindOneAndUpdateAsync(filter, eventIndexReplacement);
+
+            //Find every driver in season standings and calculate overall score by adding every event together
 
             for (int i = 0; i < season.Standings.Count; i++)
             {
@@ -270,14 +268,13 @@ namespace ASG_Leaderboard_Project
                 }
             }
 
-            //Update season standings in document
-            var seasonStangingsReplacement = Builders<Season>.Update.Set("Standings", season.Standings);
-            await _seasonCollection.FindOneAndUpdateAsync(filter, seasonStangingsReplacement);
-
             returnString += "\n\nAfter " + season.CurrentEventIndex + " event(s), the season standings are as follows:\n";
 
             season.Standings.Sort((x, y) => x.Value.CompareTo(y.Value));
             season.Standings.Reverse();
+
+            // Update whole document
+            await _seasonCollection.ReplaceOneAsync(filter, season);
 
             for (int i = 0; i < season.Standings.Count; i++)
             {
