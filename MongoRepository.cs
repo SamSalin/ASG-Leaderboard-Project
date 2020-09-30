@@ -141,5 +141,39 @@ namespace ASG_Leaderboard_Project
             await _seasonCollection.FindOneAndDeleteAsync(filter);
             return deletedSeason;
         }
+
+        public async Task<List<string>> GetSeasonStandings(Guid seasonId)
+        {
+            var season = await GetSeason(seasonId);
+            var standingsList = season.Standings;
+            List<string> finalList =  new List<string>();
+
+            standingsList.Sort((x, y) => x.Value.CompareTo(y.Value));
+
+            foreach (var item in standingsList)
+            {
+                string tempString = item.Key.Name + ": " + item.Value.ToString();
+                finalList.Add(tempString);
+            }
+            
+            return finalList;
+        }
+
+        public async Task<List<string>> GetEventStandings(Guid seasonId, Guid eventId)
+        {
+            var tempEvent = await GetSeasonEvent(seasonId, eventId);
+            var standingsList = tempEvent.Standings;
+            List<string> finalList =  new List<string>();
+
+            standingsList.Sort((x, y) => x.Value.CompareTo(y.Value));
+
+            foreach (var item in standingsList)
+            {
+                string tempString = item.Key.Name + ": " + item.Value.ToString();
+                finalList.Add(tempString);
+            }
+            
+            return finalList;
+        }
     }
 }

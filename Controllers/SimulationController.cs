@@ -19,5 +19,29 @@ namespace ASG_Leaderboard_Project.Controllers
         }
 
         // ------------ SIMULATION FUNCTIONS----------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [HttpGet("/simulate/season/{seasonId}/standings")]
+        public async Task<List<string>> GetSeasonStandings(Guid id)
+        {
+            return await _repo.GetSeasonStandings(id);
+        }
+
+        [HttpGet("/simulate/season/{seasonId}/event/{eventId}/standings")]
+        public async Task<List<string>> GetSeasonStandings(Guid seasonId, Guid eventId)
+        {
+            return await _repo.GetEventStandings(seasonId, eventId);
+        }
     }
 }
