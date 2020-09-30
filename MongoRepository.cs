@@ -204,8 +204,9 @@ namespace ASG_Leaderboard_Project
         public async Task<string> LastEvent(Guid id)
         {
             int sija = 0;
+            string list = "";
             int lastEventIndex = await GetCurrentEventIndex(id) - 1;
-            if (lastEventIndex < 2)
+            if (lastEventIndex < 1)
             {
                 //tämä estää errorin tässä vaiheessa
                 lastEventIndex = 0;
@@ -219,34 +220,95 @@ namespace ASG_Leaderboard_Project
 
             List<KeyValuePair<Driver, int>> standings = season.Events[lastEventIndex].Standings;
 
-            Console.WriteLine("Last event: " + season.Events[lastEventIndex].Name + " Date: " + season.Events[lastEventIndex].Date);
+            //Console.WriteLine("Last event: " + season.Events[lastEventIndex].Name + " Date: " + season.Events[lastEventIndex].Date);
+            list += "Last event: " + season.Events[lastEventIndex].Name + " Date: " + season.Events[lastEventIndex].Date.ToString() + "\n";
             for (int i = 0; i < season.Standings.Count; i++)
             {
                 sija = 1 + i;
-                Console.WriteLine(sija + ". " + standings[i].Key.Name + " , Points: " + standings[i].Value);
+                //Console.WriteLine(sija + ". " + standings[i].Key.Name + " , Points: " + standings[i].Value);
+                list += "\n" + sija.ToString() + ". " + standings[i].Key.Name + ", Points: " + standings[i].Value.ToString();
             }
 
 
-            return null;
+            return list;
         }
         public async Task<string> SimulateNextEvent(Guid id)
         {
+            string returnString = "";
+
             Season season = await GetSeason(id);
+
+            returnString += ("Simulating event " + (season.CurrentEventIndex + 1) + ": " + season.Events[season.CurrentEventIndex].Name + "!\n");
+            returnString += ("Results of the event were:\n");
+
             List<KeyValuePair<Driver, int>> updatedStandings = CalculateResults(season.Drivers);
-            Console.WriteLine(season.Events[0].Standings[0].Value);
+            season.Events[season.CurrentEventIndex].Standings = updatedStandings;
 
             for (int i = 0; i < updatedStandings.Count; i++)
             {
-                Console.WriteLine("Driver: " + updatedStandings[i].Key.Name + ", Points: " + updatedStandings[i].Value);
+                returnString += "\n" + (i + 1) + ". " + updatedStandings[i].Key.Name + " - " + updatedStandings[i].Value + " points";
             }
 
-            return null;
+            // Update events in document
+            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
+            var eventReplacement = Builders<Season>.Update.Set("Events", season.Events);
+            await _seasonCollection.FindOneAndUpdateAsync(filter, eventReplacement);
+
+            //Update currentlevelindex in document
+            season.CurrentEventIndex++;
+            var eventIndexReplacement = Builders<Season>.Update.Set("CurrentEventIndex", season.CurrentEventIndex);
+            await _seasonCollection.FindOneAndUpdateAsync(filter, eventIndexReplacement);
+
+            for (int i = 0; i < season.Standings.Count; i++)
+            {
+                for (int j = 0; j < updatedStandings.Count; j++)
+                {
+                    if (updatedStandings[j].Key.Id == season.Standings[i].Key.Id)
+                    {
+                        season.Standings[i] = new KeyValuePair<Driver, int>(updatedStandings[j].Key, AddDriverStandings(season, updatedStandings[j].Key));
+                    }
+                }
+            }
+
+            //Update season standings in document
+            var seasonStangingsReplacement = Builders<Season>.Update.Set("Standings", season.Standings);
+            await _seasonCollection.FindOneAndUpdateAsync(filter, seasonStangingsReplacement);
+
+            returnString += "\n\nAfter " + season.CurrentEventIndex + " event(s), the season standings are as follows:\n";
+
+            season.Standings.Sort((x, y) => x.Value.CompareTo(y.Value));
+            season.Standings.Reverse();
+
+            for (int i = 0; i < season.Standings.Count; i++)
+            {
+                returnString += "\n" + (i + 1) + ". " + season.Standings[i].Key.Name + " - " + season.Standings[i].Value + " points"; ;
+            }
+
+            return returnString;
         }
 
+        public int AddDriverStandings(Season season, Driver driver)
+        {
+            int points = 0;
+
+            for (int i = 0; i < season.CurrentEventIndex; i++)
+            {
+                for (int j = 0; j < season.Events[i].Standings.Count; j++)
+                {
+                    if (season.Events[i].Standings[j].Key.Id == driver.Id)
+                    {
+                        points += season.Events[i].Standings[j].Value;
+                    }
+                }
+            }
+            return points;
+        }
+
+        //Shuffles through the list of drivers in the event and scores them accordingly
         public List<KeyValuePair<Driver, int>> CalculateResults(List<Driver> drivers)
         {
-            Int32 points;
-            Int32[] pointsForPlacements = new Int32[] { 25, 18, 15, 12, 10, 8, 6, 4, 2, 1 };
+            int points;
+            int[] pointsForPlacements = new int[] { 25, 18, 15, 12, 10, 8, 6, 4, 2, 1 };
             List<KeyValuePair<Driver, int>> updatedStandings = new List<KeyValuePair<Driver, int>>();
             Shuffle(drivers);
 
