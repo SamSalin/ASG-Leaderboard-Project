@@ -91,6 +91,13 @@ namespace ASG_Leaderboard_Project
             return search.Events.FirstOrDefault(e => e.Id == eventId);
         }
 
+        public async Task<Int32> GetCurrentEventIndex(Guid id)
+        {
+            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
+            var season = await _seasonCollection.Find(filter).FirstAsync();
+            return season.CurrentEventIndex;
+        }
+
         public async Task<Event> ModifySeasonEvent(Guid seasonid, Guid eventId, Event modifiedEvent)
         {
             var filter = Builders<Season>.Filter.Where(s => s.Id == seasonid && s.Events.Any(e => e.Id == eventId));

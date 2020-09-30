@@ -20,3 +20,4 @@ namespace ASG_Leaderboard_Project.Controllers
 
         // ------------ SIMULATION FUNCTIONS----------------------
     }
+}

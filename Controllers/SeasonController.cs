@@ -85,6 +85,12 @@ namespace ASG_Leaderboard_Project.Controllers
             return await _repo.GetAllSeasons();
         }
 
+        [HttpGet("/seasons/get/{seasonId}/index")]
+        public async Task<Int32> GetCurrentEventIndex(Guid seasonId)
+        {
+            return await _repo.GetCurrentEventIndex(seasonId);
+        }
+
         [HttpGet("/seasons/get/{seasonId}/event/{eventId}")]
         public async Task<Event> GetSeasonEvent(Guid seasonId, Guid eventId)
         {
