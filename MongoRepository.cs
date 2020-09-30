@@ -67,7 +67,7 @@ namespace ASG_Leaderboard_Project
 
             //Every time we create new drivers, we should update the season standings
             await AddToSeasonStandings(id, driverList);
-            //await AddToEventStandings(id, driverList);
+            await AddToEventStandings(id, driverList);
 
             return driverList.ToArray();
         }
