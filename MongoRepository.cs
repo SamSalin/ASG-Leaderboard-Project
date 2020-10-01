@@ -238,10 +238,10 @@ namespace ASG_Leaderboard_Project
             Season tmpSeason = await GetSeason(seasonId);
             int nextEventIndex = await GetCurrentEventIndex(seasonId);
             string tempString;
-            if(nextEventIndex < tmpSeason.Events.Count)
+            if (nextEventIndex < tmpSeason.Events.Count)
             {
                 var tmpEvent = tmpSeason.Events[nextEventIndex];
-                tempString = tmpEvent.Name + "\nTrack: " + tmpEvent.Track.Name + "  " + tmpEvent.Track.Country + "\nDate: " + tmpEvent.Date.ToString("ddd, dd MMM yyy HH’:’mm’:’ss ‘GMT’");
+                tempString = tmpEvent.Name + "\nTrack: " + tmpEvent.Track.Name + "  " + tmpEvent.Track.Country + "\nDate: " + tmpEvent.Date.ToString();
             }
             else { tempString = "No more events in this season!"; }
 
