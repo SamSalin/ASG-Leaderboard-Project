@@ -40,6 +40,7 @@ namespace ASG_Leaderboard_Project
 
         public Task<Event> CreateEvent(Guid id, Event createdEvent)
         {
+
             var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
             var push = Builders<Season>.Update.Push("Events", createdEvent);
             _seasonCollection.FindOneAndUpdateAsync(filter, push);
@@ -215,24 +216,18 @@ namespace ASG_Leaderboard_Project
             int lastEventIndex = await GetCurrentEventIndex(id) - 1;
             if (lastEventIndex < 1)
             {
-                //tämä estää errorin tässä vaiheessa
-                lastEventIndex = 0;
-
-
                 //error tähän, ei aiempia kilpailuita
-                //return null;
+                throw new NotFoundException("Last Event not found!");
             }
 
             var season = await GetSeason(id);
 
             List<KeyValuePair<Driver, int>> standings = season.Events[lastEventIndex].Standings;
 
-            //Console.WriteLine("Last event: " + season.Events[lastEventIndex].Name + " Date: " + season.Events[lastEventIndex].Date);
             list += "Last event: " + season.Events[lastEventIndex].Name + " Date: " + season.Events[lastEventIndex].Date.ToString() + "\n";
             for (int i = 0; i < season.Standings.Count; i++)
             {
                 sija = 1 + i;
-                //Console.WriteLine(sija + ". " + standings[i].Key.Name + " , Points: " + standings[i].Value);
                 list += "\n" + sija.ToString() + ". " + standings[i].Key.Name + ", Points: " + standings[i].Value.ToString();
             }
 
@@ -250,7 +245,7 @@ namespace ASG_Leaderboard_Project
                 var tmpEvent = tmpSeason.Events[nextEventIndex];
                 tempString = tmpEvent.Name + "\nTrack: " + tmpEvent.Track.Name + "  " + tmpEvent.Track.Country + "\nDate: " + tmpEvent.Date.ToString();
             }
-            else { tempString = "No more events in this season!"; }
+            else { throw new OutOfRangeError("Season has already ended!"); }
 
             return tempString;
         }
