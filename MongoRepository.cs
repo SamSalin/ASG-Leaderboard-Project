@@ -32,6 +32,10 @@ namespace ASG_Leaderboard_Project
             _bsonDocumentCollection = database.GetCollection<BsonDocument>("seasons");
         }
 
+        //------------------ CRUD-OPERATIONS-----------------------
+
+
+        //----CREATE-----------------------
         public async Task<Season> CreateSeason(Season season)
         {
             await _seasonCollection.InsertOneAsync(season);
@@ -75,6 +79,8 @@ namespace ASG_Leaderboard_Project
             return driverList.ToArray();
         }
 
+        //----READ-----------------------
+
         public async Task<Season> GetSeason(Guid id)
         {
             var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
@@ -100,6 +106,14 @@ namespace ASG_Leaderboard_Project
             return seasons.ToArray();
         }
 
+        public async Task<Driver> GetDriver(Guid id, Guid driverId)
+        {
+            var filter = Builders<Season>.Filter.ElemMatch<Driver>(s => s.Drivers, d => d.Id == driverId);
+            var search = await _seasonCollection.Find(filter).FirstAsync();
+
+            return search.Drivers.FirstOrDefault(d => d.Id == driverId);
+        }
+
         public async Task<Event> GetSeasonEvent(Guid seasonId, Guid eventId)
         {
             var filter = Builders<Season>.Filter.ElemMatch<Event>(s => s.Events, e => e.Id == eventId);
@@ -113,6 +127,8 @@ namespace ASG_Leaderboard_Project
             var season = await GetSeason(id);
             return season.CurrentEventIndex;
         }
+
+        //----UPDATE-----------------------
 
         public async Task<Event> ModifySeasonEvent(Guid seasonid, Guid eventId, Event modifiedEvent)
         {
@@ -168,6 +184,8 @@ namespace ASG_Leaderboard_Project
 
             return await _seasonCollection.FindOneAndUpdateAsync(filter, replacement, options);
         }
+
+        //----DELETE-----------------------
 
         public async Task<Season> DeleteSeason(Guid id)
         {
@@ -257,7 +275,34 @@ namespace ASG_Leaderboard_Project
             return tempString;
         }
 
+        public async Task<string> GetDriverStandings(Guid seasonId, Guid driverId)
+        {
+            var season = await GetSeason(seasonId);
+            var driver = await GetDriver(seasonId, driverId);
 
+            int simulatedEvents = season.CurrentEventIndex;
+            int totalPoints = AddDriverStandings(season, driver);
+
+            string returnString = "";
+
+            returnString += "After " + simulatedEvents + " events, " + driver.Name + " has placed accordingly:\n";
+
+            for (int i = 0; i < simulatedEvents; i++)
+            {
+                int index = season.Events[i].Standings.FindIndex(d => d.Key.Id == driver.Id) + 1;
+                for (int j = 0; j < season.Events[i].Standings.Count; j++)
+                {
+                    if (season.Events[i].Standings[j].Key.Id == driverId)
+                    {
+                        returnString += "\n" + season.Events[i].Name + " - " + index;
+                        break;
+                    }
+                }
+            }
+
+            returnString += "\n\nAccumulating " + totalPoints + " points in total";
+            return returnString;
+        }
 
         public async Task<string> SimulateNextEvent(Guid id)
         {

@@ -48,5 +48,11 @@ namespace ASG_Leaderboard_Project.Controllers
         {
             return await _repo.GetEventStandings(seasonId, eventId);
         }
+
+        [HttpGet("/simulate/season/{seasonId}/driver/{driverId}/standings")]
+        public async Task<string> GetDriverStandings(Guid seasonId, Guid driverId)
+        {
+            return await _repo.GetDriverStandings(seasonId, driverId);
+        }
     }
 }
