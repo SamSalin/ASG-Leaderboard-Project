@@ -37,6 +37,8 @@ namespace ASG_Leaderboard_Project
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+
             //app.UseHttpsRedirection();
 
             app.UseRouting();

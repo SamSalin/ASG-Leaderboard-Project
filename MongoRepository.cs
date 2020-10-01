@@ -254,6 +254,11 @@ namespace ASG_Leaderboard_Project
         {
             Season season = await GetSeason(id);
 
+            if (season.CurrentEventIndex == season.Events.Count)
+            {
+                throw new OutOfRangeError();
+            }
+
             string returnString = "";
             returnString += ("Simulating event " + (season.CurrentEventIndex + 1) + ": " + season.Events[season.CurrentEventIndex].Name + "!\n");
             returnString += ("Results of the event were:\n");

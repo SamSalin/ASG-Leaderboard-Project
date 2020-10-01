@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace ASG_Leaderboard_Project
 {
     [Serializable]
-    internal class OutOfRangeError : Exception
+    public class OutOfRangeError : Exception
     {
         public OutOfRangeError()
         {
