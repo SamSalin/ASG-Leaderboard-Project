@@ -6,9 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ASG_Leaderboard_Project.Controllers
 {
+    /*--------------------------------------------------------------
+        Season controller includes all necessary CRUD-operations for
+        maintaining a season database
+    */
 
     [ApiController]
     [Route("[controller]")]
+
     public class SeasonController : ControllerBase
     {
         private readonly MongoRepository _repo;
@@ -83,6 +88,19 @@ namespace ASG_Leaderboard_Project.Controllers
         public async Task<Season[]> GetAllSeasons()
         {
             return await _repo.GetAllSeasons();
+        }
+
+        [HttpGet("/seasons/get/{id}/drivers/{driverId}")]
+        public async Task<Driver> GetDriver(Guid id, Guid driverId)
+        {
+            return await _repo.GetDriver(id, driverId);
+        }
+
+        [HttpGet("/seasons/get/{id}/drivers")]
+        public async Task<Driver[]> GetAllDrivers(Guid id)
+        {
+            var season = await GetSeason(id);
+            return season.Drivers.ToArray();
         }
 
         [HttpGet("/seasons/get/{seasonId}/index")]

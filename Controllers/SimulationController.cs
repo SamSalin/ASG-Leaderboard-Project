@@ -6,6 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ASG_Leaderboard_Project.Controllers
 {
+    /*--------------------------------------------------------------
+        Simulation controller includes all HTTP request methods neede to
+        simulate a full season. These methods are intended to be called
+        by the end users. Methods in this document return a simple
+        string in a easily readable format. 
+    */
 
     [ApiController]
     [Route("[controller]")]
@@ -37,6 +43,13 @@ namespace ASG_Leaderboard_Project.Controllers
         {
             return await _repo.SimulateNextEvent(id);
         }
+
+        [HttpGet("/simulate/season/{id}/all")]
+        public async Task<String> SimulateRestofTheSeason(Guid id)
+        {
+            return await _repo.SimulateRestofTheSeason(id);
+        }
+
         [HttpGet("/simulate/season/{id}/standings")]
         public async Task<List<string>> GetSeasonStandings(Guid id)
         {

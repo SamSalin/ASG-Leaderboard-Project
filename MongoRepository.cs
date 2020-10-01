@@ -52,7 +52,6 @@ namespace ASG_Leaderboard_Project
 
             return createdEvent;
         }
-
         public Track CreateTrack(ModifiedTrack modifiedTrack)
         {
             Track track = new Track()
@@ -112,6 +111,13 @@ namespace ASG_Leaderboard_Project
             var search = await _seasonCollection.Find(filter).FirstAsync();
 
             return search.Drivers.FirstOrDefault(d => d.Id == driverId);
+        }
+
+        public async Task<Driver[]> GetAllDrivers(Guid id)
+        {
+            var season = await GetSeason(id);
+
+            return season.Drivers.ToArray();
         }
 
         public async Task<Event> GetSeasonEvent(Guid seasonId, Guid eventId)
@@ -357,15 +363,35 @@ namespace ASG_Leaderboard_Project
             season.Standings.Sort((x, y) => x.Value.CompareTo(y.Value));
             season.Standings.Reverse();
 
+            for (int i = 0; i < season.Standings.Count; i++)
+            {
+                returnString += "\n" + (i + 1) + ". " + season.Standings[i].Key.Name + " - " + season.Standings[i].Value + " points";
+            }
+
             // Update whole document
             await _seasonCollection.ReplaceOneAsync(filter, season);
 
-            for (int i = 0; i < season.Standings.Count; i++)
+            return returnString;
+        }
+
+        public async Task<string> SimulateRestofTheSeason(Guid id)
+        {
+            var season = await GetSeason(id);
+
+            if (season.CurrentEventIndex == season.Events.Count)
             {
-                returnString += "\n" + (i + 1) + ". " + season.Standings[i].Key.Name + " - " + season.Standings[i].Value + " points"; ;
+                throw new OutOfRangeError("No more events to simulate!");
+            }
+
+            string returnString = "Simulating all remaining events\n";
+
+            for (int i = season.CurrentEventIndex; i < season.Events.Count; i++)
+            {
+                returnString += "\n\n" + await SimulateNextEvent(id);
             }
 
             return returnString;
+
         }
 
         public int AddDriverStandings(Season season, Driver driver)
