@@ -4,6 +4,7 @@ namespace ASG_Leaderboard_Project
 {
     public class ModifiedSeason
     {
+        [DataType(DataType.Text)]
         public string name { get; set; }
         public int currentEventIndex { get; set; }
         public List<Event> Events { get; set; }

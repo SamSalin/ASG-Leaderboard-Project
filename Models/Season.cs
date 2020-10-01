@@ -5,7 +5,11 @@ namespace ASG_Leaderboard_Project
 {
     public class Season
     {
+        [Required(ErrorMessage = "Guid is required")]
         public Guid Id { get; set; }
+
+        [Required(ErrorMessage = "Name is required")]
+        [DataType(DataType.Text)]
         public string Name { get; set; }
         public int CurrentEventIndex { get; set; } //Check which event is up next in the season
         public List<Event> Events { get; set; }
