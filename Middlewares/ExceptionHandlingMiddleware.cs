@@ -19,16 +19,23 @@ namespace ASG_Leaderboard_Project
             {
                 await _next(context);
             }
-            catch (OutOfRangeError)
+            catch (NotFoundException ex)
             {
-                Console.WriteLine("Mems");
-                context.Response.StatusCode = 400;
-                await context.Response.WriteAsync("Out of range!");
+                context.Response.StatusCode = 404;
+                await context.Response.WriteAsync("Not found Exception: " + ex.Message);
                 return;
             }
-            catch (System.Exception)
+            catch (OutOfRangeError ex)
             {
-
+                context.Response.StatusCode = 400;
+                await context.Response.WriteAsync("Not found Exception: " + ex.Message);
+                return;
+            }
+            catch (System.Exception ex)
+            {
+                context.Response.StatusCode = 400;
+                await context.Response.WriteAsync("System Exception: " + ex.Message);
+                return;
             }
         }
     }

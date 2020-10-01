@@ -75,7 +75,13 @@ namespace ASG_Leaderboard_Project
         public async Task<Season> GetSeason(Guid id)
         {
             var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
-            var season = await _seasonCollection.Find(filter).FirstAsync();
+            var season = await _seasonCollection.Find(filter).FirstOrDefaultAsync();
+
+            if (season == null)
+            {
+                throw new NotFoundException("Season not found!");
+            }
+
             return season;
         }
 
@@ -120,15 +126,16 @@ namespace ASG_Leaderboard_Project
 
         public async Task<Season> AddToSeasonStandings(Guid id, List<Driver> driverList)
         {
-            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
-            var search = await _seasonCollection.Find(filter).FirstAsync();
-            List<KeyValuePair<Driver, int>> standings = search.Standings;
+            var season = await GetSeason(id);
+
+            List<KeyValuePair<Driver, int>> standings = season.Standings;
 
             for (int i = 0; i < driverList.Count; i++)
             {
                 standings.Add(new KeyValuePair<Driver, int>(driverList[i], default));
             }
 
+            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
             var replacement = Builders<Season>.Update.Set("Standings", standings);
             await _seasonCollection.FindOneAndUpdateAsync(filter, replacement);
 
@@ -137,18 +144,18 @@ namespace ASG_Leaderboard_Project
 
         public async Task<Season> AddToEventStandings(Guid id, List<Driver> driverList)
         {
-            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
-            var search = await _seasonCollection.Find(filter).FirstAsync();
+            var season = await GetSeason(id);
 
-            for (int j = 0; j < search.Events.Count; j++)
+            for (int j = 0; j < season.Events.Count; j++)
             {
                 for (int i = 0; i < driverList.Count; i++)
                 {
-                    search.Events[j].Standings.Add(new KeyValuePair<Driver, int>(driverList[i], default));
+                    season.Events[j].Standings.Add(new KeyValuePair<Driver, int>(driverList[i], default));
                 }
             }
 
-            var replacement = Builders<Season>.Update.Set("Events", search.Events);
+            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
+            var replacement = Builders<Season>.Update.Set("Events", season.Events);
             await _seasonCollection.FindOneAndUpdateAsync(filter, replacement);
 
             return await _seasonCollection.FindOneAndUpdateAsync(filter, replacement, options);
@@ -256,7 +263,7 @@ namespace ASG_Leaderboard_Project
 
             if (season.CurrentEventIndex == season.Events.Count)
             {
-                throw new OutOfRangeError();
+                throw new OutOfRangeError("Cannot simulate season that has already ended!");
             }
 
             string returnString = "";
