@@ -38,14 +38,15 @@ namespace ASG_Leaderboard_Project
             return season;
         }
 
-        public Task<Event> CreateEvent(Guid id, Event createdEvent)
+        public async Task<Event> CreateEvent(Guid id, Event createdEvent)
         {
+            var season = await GetSeason(id);
 
             var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
             var push = Builders<Season>.Update.Push("Events", createdEvent);
-            _seasonCollection.FindOneAndUpdateAsync(filter, push);
+            await _seasonCollection.FindOneAndUpdateAsync(filter, push);
 
-            return Task.FromResult(createdEvent);
+            return createdEvent;
         }
 
         public Track CreateTrack(ModifiedTrack modifiedTrack)
@@ -62,13 +63,14 @@ namespace ASG_Leaderboard_Project
 
         public async Task<Driver[]> CreateDrivers(Guid id, List<Driver> driverList)
         {
+            var season = await GetSeason(id);
+
             var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
             var push = Builders<Season>.Update.PushEach("Drivers", driverList);
             await _seasonCollection.FindOneAndUpdateAsync(filter, push);
 
-            //Every time we create new drivers, we should update the season standings
+            //Every time we create new drivers, we should add them to the season standings
             await AddToSeasonStandings(id, driverList);
-            await AddToEventStandings(id, driverList);
 
             return driverList.ToArray();
         }
@@ -89,6 +91,12 @@ namespace ASG_Leaderboard_Project
         public async Task<Season[]> GetAllSeasons()
         {
             var seasons = await _seasonCollection.Find(new BsonDocument()).ToListAsync();
+
+            if (!seasons.Any())
+            {
+                throw new NotFoundException("No seasons found!");
+            }
+
             return seasons.ToArray();
         }
 
@@ -102,8 +110,7 @@ namespace ASG_Leaderboard_Project
 
         public async Task<Int32> GetCurrentEventIndex(Guid id)
         {
-            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
-            var season = await _seasonCollection.Find(filter).FirstAsync();
+            var season = await GetSeason(id);
             return season.CurrentEventIndex;
         }
 
@@ -259,6 +266,13 @@ namespace ASG_Leaderboard_Project
             if (season.CurrentEventIndex == season.Events.Count)
             {
                 throw new OutOfRangeError("Cannot simulate season that has already ended!");
+            }
+
+            //If the standings for the next event are empty, populate event standing with drivers from the season
+
+            if (season.Events[season.CurrentEventIndex].Standings.Count == 0)
+            {
+                await AddToEventStandings(id, season.Drivers);
             }
 
             string returnString = "";
