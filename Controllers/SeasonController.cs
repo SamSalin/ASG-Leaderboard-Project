@@ -115,6 +115,12 @@ namespace ASG_Leaderboard_Project.Controllers
             return await _repo.GetSeasonEvent(seasonId, eventId);
         }
 
+        [HttpGet("/seasons/get/{seasonId}/event/{eventId}/track")]
+        public async Task<Track> GetSeasonTrack(Guid id, Guid eventId)
+        {
+            return await _repo.GetSeasonTrack(id, eventId);
+        }
+
         // ------------ UPDATE-OPERATIONS----------------------
 
         [HttpPut("/seasons/modify/{id}/index")]
@@ -135,6 +141,29 @@ namespace ASG_Leaderboard_Project.Controllers
             eventToModify.Track.Country = modifiedEvent.Track.Country;
 
             return await _repo.ModifySeasonEvent(seasonId, eventId, eventToModify);
+        }
+
+        [HttpPut("/seasons/modify/{seasonId}/driver/{driverId}")]
+        public async Task<Driver> ModifyDriver(Guid seasonId, Guid driverId, [FromBody] ModifiedDriver modifiedDriver)
+        {
+            Driver driverToModify = await GetDriver(seasonId, driverId);
+
+            driverToModify.Name = modifiedDriver.Name;
+            driverToModify.Nationality = modifiedDriver.Nationality;
+            driverToModify.Team = modifiedDriver.Team;
+
+            return await _repo.ModifyDriver(seasonId, driverId, driverToModify);
+        }
+
+        [HttpPut("/seasons/modify/{seasonId}/event/{eventId}/track/{trackId}")]
+        public async Task<Track> ModifyTrack(Guid seasonId, Guid eventId, Guid trackId, [FromBody] ModifiedTrack modifiedTrack)
+        {
+            Track trackToModify = await GetSeasonTrack(seasonId, eventId);
+
+            trackToModify.Name = modifiedTrack.Name;
+            trackToModify.Country = modifiedTrack.Country;
+
+            return await _repo.ModifyTrack(seasonId, eventId, trackToModify);
         }
 
         // ------------ DELETE-OPERATIONS----------------------

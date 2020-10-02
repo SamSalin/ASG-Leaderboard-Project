@@ -120,6 +120,15 @@ namespace ASG_Leaderboard_Project
             return season.Drivers.ToArray();
         }
 
+        public async Task<Track> GetSeasonTrack(Guid id, Guid eventId)
+        {
+            var filter = Builders<Season>.Filter.ElemMatch<Event>(s => s.Events, e => e.Id == eventId);
+            var search = await _seasonCollection.Find(filter).FirstAsync();
+
+            return search.Events.Single(e => e.Id == eventId).Track;
+
+        }
+
         public async Task<Event> GetSeasonEvent(Guid seasonId, Guid eventId)
         {
             var filter = Builders<Season>.Filter.ElemMatch<Event>(s => s.Events, e => e.Id == eventId);
@@ -139,9 +148,9 @@ namespace ASG_Leaderboard_Project
         public async Task<Event> ModifySeasonEvent(Guid seasonid, Guid eventId, Event modifiedEvent)
         {
             var filter = Builders<Season>.Filter.Where(s => s.Id == seasonid && s.Events.Any(e => e.Id == eventId));
-            var replace = Builders<Season>.Update.Set(e => e.Events[-1], modifiedEvent);
+            var update = Builders<Season>.Update.Set(e => e.Events[-1], modifiedEvent);
 
-            await _seasonCollection.UpdateOneAsync(filter, replace);
+            await _seasonCollection.UpdateOneAsync(filter, update);
 
             return modifiedEvent;
         }
@@ -152,6 +161,26 @@ namespace ASG_Leaderboard_Project
             var update = Builders<Season>.Update.Set("CurrentEventIndex", index);
 
             return await _seasonCollection.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        public async Task<Driver> ModifyDriver(Guid seasonId, Guid driverId, Driver modifiedDriver)
+        {
+            var filter = Builders<Season>.Filter.Where(s => s.Id == seasonId && s.Drivers.Any(d => d.Id == driverId));
+            var update = Builders<Season>.Update.Set(s => s.Drivers[-1], modifiedDriver);
+
+            await _seasonCollection.UpdateOneAsync(filter, update);
+
+            return modifiedDriver;
+        }
+
+        public async Task<Track> ModifyTrack(Guid seasonId, Guid eventId, Track modifiedTrack)
+        {
+            var filter = Builders<Season>.Filter.Where(s => s.Id == seasonId && s.Events.Any(e => e.Id == eventId));
+            var update = Builders<Season>.Update.Set(e => e.Events[-1].Track, modifiedTrack);
+
+            await _seasonCollection.UpdateOneAsync(filter, update);
+
+            return modifiedTrack;
         }
 
         public async Task<Season> AddToSeasonStandings(Guid id, List<Driver> driverList)
