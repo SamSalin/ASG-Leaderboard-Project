@@ -137,7 +137,7 @@ namespace ASG_Leaderboard_Project
             return search.Events.FirstOrDefault(e => e.Id == eventId);
         }
 
-        public async Task<Int32> GetCurrentEventIndex(Guid id)
+        public async Task<int> GetCurrentEventIndex(Guid id)
         {
             var season = await GetSeason(id);
             return season.CurrentEventIndex;
@@ -145,9 +145,11 @@ namespace ASG_Leaderboard_Project
 
         //----UPDATE-----------------------
 
-        public async Task<Event> ModifySeasonEvent(Guid seasonid, Guid eventId, Event modifiedEvent)
+        public async Task<Event> ModifySeasonEvent(Guid seasonId, Guid eventId, Event modifiedEvent)
         {
-            var filter = Builders<Season>.Filter.Where(s => s.Id == seasonid && s.Events.Any(e => e.Id == eventId));
+            await CheckSeasonStartedException(seasonId);
+
+            var filter = Builders<Season>.Filter.Where(s => s.Id == seasonId && s.Events.Any(e => e.Id == eventId));
             var update = Builders<Season>.Update.Set(e => e.Events[-1], modifiedEvent);
 
             await _seasonCollection.UpdateOneAsync(filter, update);
@@ -165,6 +167,8 @@ namespace ASG_Leaderboard_Project
 
         public async Task<Driver> ModifyDriver(Guid seasonId, Guid driverId, Driver modifiedDriver)
         {
+            await CheckSeasonStartedException(seasonId);
+
             var filter = Builders<Season>.Filter.Where(s => s.Id == seasonId && s.Drivers.Any(d => d.Id == driverId));
             var update = Builders<Season>.Update.Set(s => s.Drivers[-1], modifiedDriver);
 
@@ -175,6 +179,8 @@ namespace ASG_Leaderboard_Project
 
         public async Task<Track> ModifyTrack(Guid seasonId, Guid eventId, Track modifiedTrack)
         {
+            await CheckSeasonStartedException(seasonId);
+
             var filter = Builders<Season>.Filter.Where(s => s.Id == seasonId && s.Events.Any(e => e.Id == eventId));
             var update = Builders<Season>.Update.Set(e => e.Events[-1].Track, modifiedTrack);
 
@@ -305,7 +311,7 @@ namespace ASG_Leaderboard_Project
                 var tmpEvent = tmpSeason.Events[nextEventIndex];
                 tempString = tmpEvent.Name + "\nTrack: " + tmpEvent.Track.Name + "  " + tmpEvent.Track.Country + "\nDate: " + tmpEvent.Date.ToString();
             }
-            else { throw new OutOfRangeError("Season has already ended!"); }
+            else { throw new OutOfRangeException("Season has already ended!"); }
 
             return tempString;
         }
@@ -345,7 +351,7 @@ namespace ASG_Leaderboard_Project
 
             if (season.CurrentEventIndex == season.Events.Count)
             {
-                throw new OutOfRangeError("Cannot simulate season that has already ended!");
+                throw new OutOfRangeException("Cannot simulate season that has already ended!");
             }
 
             //If the standings for the next event are empty, populate event standing with drivers from the season
@@ -409,7 +415,7 @@ namespace ASG_Leaderboard_Project
 
             if (season.CurrentEventIndex == season.Events.Count)
             {
-                throw new OutOfRangeError("No more events to simulate!");
+                throw new OutOfRangeException("No more events to simulate!");
             }
 
             string returnString = "Simulating all remaining events\n";
@@ -475,6 +481,16 @@ namespace ASG_Leaderboard_Project
                 Driver value = drivers[k];
                 drivers[k] = drivers[n];
                 drivers[n] = value;
+            }
+        }
+
+        //------------------ERROR CHECKING-----------------
+
+        public async Task CheckSeasonStartedException(Guid seasonId)
+        {
+            if (await GetCurrentEventIndex(seasonId) > 0)
+            {
+                throw new SeasonStartedException("Cannot modify season in progress!");
             }
         }
     }

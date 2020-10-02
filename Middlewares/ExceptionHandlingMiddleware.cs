@@ -25,10 +25,16 @@ namespace ASG_Leaderboard_Project
                 await context.Response.WriteAsync("Not found Exception: " + ex.Message);
                 return;
             }
-            catch (OutOfRangeError ex)
+            catch (OutOfRangeException ex)
             {
                 context.Response.StatusCode = 400;
                 await context.Response.WriteAsync("Not found Exception: " + ex.Message);
+                return;
+            }
+            catch (SeasonStartedException ex)
+            {
+                context.Response.StatusCode = 400;
+                await context.Response.WriteAsync("Season started Exception: " + ex.Message);
                 return;
             }
             catch (System.Exception ex)
