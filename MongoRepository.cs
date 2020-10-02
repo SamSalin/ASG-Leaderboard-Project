@@ -316,6 +316,11 @@ namespace ASG_Leaderboard_Project
             return tempString;
         }
 
+        public async Task<string> CompareDrivers(Guid seasonId, Guid driverId1, Guid driverId2)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<string> GetDriverStandings(Guid seasonId, Guid driverId)
         {
             var season = await GetSeason(seasonId);
