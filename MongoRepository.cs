@@ -20,12 +20,6 @@ namespace ASG_Leaderboard_Project
 
         public MongoRepository()
         {
-            /*
-            For local testing:
-            1. Create database called asg
-            2. Create collection called seasons
-            */
-
             var mongoClient = new MongoClient("mongodb://localhost:27017");
             var database = mongoClient.GetDatabase("asg");
             _seasonCollection = database.GetCollection<Season>("seasons");
@@ -108,14 +102,20 @@ namespace ASG_Leaderboard_Project
         public async Task<Driver> GetDriver(Guid id, Guid driverId)
         {
             var filter = Builders<Season>.Filter.ElemMatch<Driver>(s => s.Drivers, d => d.Id == driverId);
-            var search = await _seasonCollection.Find(filter).FirstAsync();
+            var search = await _seasonCollection.Find(filter).FirstAsync();     // Throws an error if fails
+            var driver = search.Drivers.FirstOrDefault(d => d.Id == driverId);
 
-            return search.Drivers.FirstOrDefault(d => d.Id == driverId);
+            return driver;
         }
 
         public async Task<Driver[]> GetAllDrivers(Guid id)
         {
             var season = await GetSeason(id);
+
+            if (!season.Drivers.Any())
+            {
+                throw new NotFoundException("Drivers not found!");
+            }
 
             return season.Drivers.ToArray();
         }
@@ -123,7 +123,7 @@ namespace ASG_Leaderboard_Project
         public async Task<Track> GetSeasonTrack(Guid id, Guid eventId)
         {
             var filter = Builders<Season>.Filter.ElemMatch<Event>(s => s.Events, e => e.Id == eventId);
-            var search = await _seasonCollection.Find(filter).FirstAsync();
+            var search = await _seasonCollection.Find(filter).FirstAsync();     // Throws an error if fails
 
             return search.Events.Single(e => e.Id == eventId).Track;
 
@@ -132,7 +132,7 @@ namespace ASG_Leaderboard_Project
         public async Task<Event> GetSeasonEvent(Guid seasonId, Guid eventId)
         {
             var filter = Builders<Season>.Filter.ElemMatch<Event>(s => s.Events, e => e.Id == eventId);
-            var search = await _seasonCollection.Find(filter).FirstAsync();
+            var search = await _seasonCollection.Find(filter).FirstAsync();     // Throws an error if fails
 
             return search.Events.FirstOrDefault(e => e.Id == eventId);
         }
@@ -147,7 +147,7 @@ namespace ASG_Leaderboard_Project
 
         public async Task<Event> ModifySeasonEvent(Guid seasonId, Guid eventId, Event modifiedEvent)
         {
-            await CheckSeasonStartedException(seasonId);
+            await CheckSeasonStartedException(seasonId);    //Checks if season has started
 
             var filter = Builders<Season>.Filter.Where(s => s.Id == seasonId && s.Events.Any(e => e.Id == eventId));
             var update = Builders<Season>.Update.Set(e => e.Events[-1], modifiedEvent);
@@ -167,7 +167,7 @@ namespace ASG_Leaderboard_Project
 
         public async Task<Driver> ModifyDriver(Guid seasonId, Guid driverId, Driver modifiedDriver)
         {
-            await CheckSeasonStartedException(seasonId);
+            await CheckSeasonStartedException(seasonId);    //Checks if season has started
 
             var filter = Builders<Season>.Filter.Where(s => s.Id == seasonId && s.Drivers.Any(d => d.Id == driverId));
             var update = Builders<Season>.Update.Set(s => s.Drivers[-1], modifiedDriver);
@@ -179,7 +179,7 @@ namespace ASG_Leaderboard_Project
 
         public async Task<Track> ModifyTrack(Guid seasonId, Guid eventId, Track modifiedTrack)
         {
-            await CheckSeasonStartedException(seasonId);
+            await CheckSeasonStartedException(seasonId);    //Checks if season has started
 
             var filter = Builders<Season>.Filter.Where(s => s.Id == seasonId && s.Events.Any(e => e.Id == eventId));
             var update = Builders<Season>.Update.Set(e => e.Events[-1].Track, modifiedTrack);
@@ -189,8 +189,11 @@ namespace ASG_Leaderboard_Project
             return modifiedTrack;
         }
 
+        // Adds a new driver to the season's standings list
+
         public async Task<Season> AddToSeasonStandings(Guid id, List<Driver> driverList)
         {
+
             var season = await GetSeason(id);
 
             List<KeyValuePair<Driver, int>> standings = season.Standings;
@@ -207,6 +210,8 @@ namespace ASG_Leaderboard_Project
             return await _seasonCollection.FindOneAndUpdateAsync(filter, replacement, options);
         }
 
+
+        // Adds all drivers from season standings to event standings when an event is simulated
         public async Task<Season> AddToEventStandings(Guid id, List<Driver> driverList)
         {
             var season = await GetSeason(id);
@@ -239,6 +244,9 @@ namespace ASG_Leaderboard_Project
 
         //-----------------Simulation----------------
 
+
+
+        // Returns current standings of the season
         public async Task<List<string>> GetSeasonStandings(Guid seasonId)
         {
             var season = await GetSeason(seasonId);
@@ -257,8 +265,12 @@ namespace ASG_Leaderboard_Project
             return finalList;
         }
 
+
+
+        // Returns current standings of the event
         public async Task<List<string>> GetEventStandings(Guid seasonId, Guid eventId)
         {
+
             var tempEvent = await GetSeasonEvent(seasonId, eventId);
             var standingsList = tempEvent.Standings;
             List<string> finalList = new List<string>();
@@ -275,6 +287,7 @@ namespace ASG_Leaderboard_Project
             return finalList;
         }
 
+        // Returns information from the last event
         public async Task<string> LastEvent(Guid id)
         {
             int sija = 0;
@@ -301,6 +314,7 @@ namespace ASG_Leaderboard_Project
             return list;
         }
 
+        // Returns information from the next event
         public async Task<string> NextEvent(Guid seasonId)
         {
             Season tmpSeason = await GetSeason(seasonId);
@@ -316,6 +330,7 @@ namespace ASG_Leaderboard_Project
             return tempString;
         }
 
+        //Compares statistic of two specified drivers
         public async Task<string> CompareDrivers(Guid seasonId, Guid driverId1, Guid driverId2)
         {
             var season = await GetSeason(seasonId);
@@ -340,6 +355,7 @@ namespace ASG_Leaderboard_Project
             return returnString;
         }
 
+        //Returns driver's standings from all events so far
         public async Task<string> GetDriverStandings(Guid seasonId, Guid driverId)
         {
             var season = await GetSeason(seasonId);
@@ -381,6 +397,7 @@ namespace ASG_Leaderboard_Project
             return returnString;
         }
 
+        //Simulates next event in the season
         public async Task<string> SimulateNextEvent(Guid id)
         {
             Season season = await GetSeason(id);
@@ -431,9 +448,11 @@ namespace ASG_Leaderboard_Project
 
             returnString += "\n\nAfter " + season.CurrentEventIndex + " event(s), the season standings are as follows:\n";
 
+            //Sort the standings
             season.Standings.Sort((x, y) => x.Value.CompareTo(y.Value));
             season.Standings.Reverse();
 
+            //For printing
             for (int i = 0; i < season.Standings.Count; i++)
             {
                 returnString += "\n" + (i + 1) + ". " + season.Standings[i].Key.Name + " - " + season.Standings[i].Value + " points";
@@ -445,6 +464,7 @@ namespace ASG_Leaderboard_Project
             return returnString;
         }
 
+        // Simulates all remaining events of the season
         public async Task<string> SimulateRestofTheSeason(Guid id)
         {
             var season = await GetSeason(id);
@@ -465,6 +485,7 @@ namespace ASG_Leaderboard_Project
 
         }
 
+        // Adds all previous event scores together for the specified driver
         public int AddDriverStandings(Season season, Driver driver)
         {
             int points = 0;
@@ -524,6 +545,8 @@ namespace ASG_Leaderboard_Project
 
         public async Task CheckSeasonStartedException(Guid seasonId)
         {
+            // User can only modify a season if no events has been started yet!
+
             if (await GetCurrentEventIndex(seasonId) > 0)
             {
                 throw new SeasonStartedException("Cannot modify season in progress!");

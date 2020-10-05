@@ -99,8 +99,7 @@ namespace ASG_Leaderboard_Project.Controllers
         [HttpGet("/seasons/get/{id}/drivers")]
         public async Task<Driver[]> GetAllDrivers(Guid id)
         {
-            var season = await GetSeason(id);
-            return season.Drivers.ToArray();
+            return await _repo.GetAllDrivers(id);
         }
 
         [HttpGet("/seasons/get/{seasonId}/index")]

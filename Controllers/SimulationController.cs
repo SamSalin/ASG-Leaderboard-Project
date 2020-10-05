@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ASG_Leaderboard_Project.Controllers
 {
     /*--------------------------------------------------------------
-        Simulation controller includes all HTTP request methods neede to
+        Simulation controller includes all HTTP request methods needed to
         simulate a full season. These methods are intended to be called
         by the end users. Methods in this document return a simple
         string in a easily readable format. 
