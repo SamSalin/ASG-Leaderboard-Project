@@ -242,6 +242,31 @@ namespace ASG_Leaderboard_Project
             return deletedSeason;
         }
 
+        public async Task<Event> DeleteEvent(Guid id, Guid eventId)
+        {
+            Event deletedEvent = await GetSeasonEvent(id, eventId);
+
+            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
+            var delete = Builders<Season>.Update.PullFilter(s => s.Events, e => e.Id == eventId);
+
+            await _seasonCollection.UpdateOneAsync(filter, delete);
+            return deletedEvent;
+        }
+
+        public async Task<Driver> DeleteDriver(Guid id, Guid driverId)
+        {
+            Driver deletedDriver = await GetDriver(id, driverId);
+
+            var filter = Builders<Season>.Filter.Eq(s => s.Id, id);
+            var deleteDriver = Builders<Season>.Update.PullFilter(s => s.Drivers, d => d.Id == driverId);
+            var deleteStandings = Builders<Season>.Update.PullFilter(s => s.Standings, d => d.Key.Id == driverId);
+
+            await _seasonCollection.UpdateOneAsync(filter, deleteDriver);
+            await _seasonCollection.UpdateOneAsync(filter, deleteStandings);
+
+            return deletedDriver;
+        }
+
         //-----------------Simulation----------------
 
 

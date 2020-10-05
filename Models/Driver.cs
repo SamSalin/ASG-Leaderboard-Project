@@ -12,14 +12,16 @@ namespace ASG_Leaderboard_Project
 
     public class Driver
     {
-        [Required(ErrorMessage = "Guid is required")]
+        [Required(ErrorMessage = "Driver guid is required")]
         public Guid Id { get; set; }
 
-        [Required(ErrorMessage = "Name is required")]
+        [Required(ErrorMessage = "Driver name is required")]
         [DataType(DataType.Text)]
         public string Name { get; set; }
+
         [DataType(DataType.Text)]
-        public string Nationality { get; set; } //FI,DE,GB jne
-        public Team Team { get; set; } // Pitäisikö olla enum, johon on määritelty tallit?
+        [StringLength(2, ErrorMessage = "The driver nationality value cannot exceed 2 characters.")]
+        public string Nationality { get; set; } //FI,DE,GB
+        public Team Team { get; set; }
     }
 }

@@ -172,5 +172,17 @@ namespace ASG_Leaderboard_Project.Controllers
         {
             return await _repo.DeleteSeason(id);
         }
+
+        [HttpDelete("/seasons/delete/season/{id}/event/{eventId}")]
+        public async Task<Event> DeleteEvent(Guid id, Guid eventId)
+        {
+            return await _repo.DeleteEvent(id, eventId);
+        }
+
+        [HttpDelete("/seasons/delete/season/{id}/driver/{driverId}")]
+        public async Task<Driver> DeleteDriver(Guid id, Guid driverId)
+        {
+            return await _repo.DeleteDriver(id, driverId);
+        }
     }
 }

@@ -5,6 +5,7 @@ namespace ASG_Leaderboard_Project
 {
     public class ModifiedSeason
     {
+        [Required(ErrorMessage = "Season name is required")]
         [DataType(DataType.Text)]
         public string name { get; set; }
         public int currentEventIndex { get; set; }
