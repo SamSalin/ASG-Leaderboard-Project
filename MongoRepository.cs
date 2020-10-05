@@ -318,7 +318,26 @@ namespace ASG_Leaderboard_Project
 
         public async Task<string> CompareDrivers(Guid seasonId, Guid driverId1, Guid driverId2)
         {
-            throw new NotImplementedException();
+            var season = await GetSeason(seasonId);
+            var driver1 = await GetDriver(seasonId, driverId1);
+            var driver2 = await GetDriver(seasonId, driverId2);
+
+            string returnString = "";
+
+            returnString += "Comparing drivers: " + driver1.Name + " & " + driver2.Name + "\n\n";
+            returnString += driver1.Name + "\n";
+
+
+            int simulatedEvents = season.CurrentEventIndex;
+            //int totalPoints = AddDriverStandings(season, driver);
+
+            returnString += await GetDriverStandings(seasonId, driverId1);
+
+            returnString += "\n\n" + driver2.Name + "\n";
+            returnString += await GetDriverStandings(seasonId, driverId2);
+
+
+            return returnString;
         }
 
         public async Task<string> GetDriverStandings(Guid seasonId, Guid driverId)
@@ -328,6 +347,9 @@ namespace ASG_Leaderboard_Project
 
             int simulatedEvents = season.CurrentEventIndex;
             int totalPoints = AddDriverStandings(season, driver);
+
+            int points = 0;
+            int[] pointsForPlacements = new int[] { 25, 18, 15, 12, 10, 8, 6, 4, 2, 1 }; // Points for finishing places
 
             string returnString = "";
 
@@ -340,7 +362,16 @@ namespace ASG_Leaderboard_Project
                 {
                     if (season.Events[i].Standings[j].Key.Id == driverId)
                     {
-                        returnString += "\n" + season.Events[i].Name + " - " + index;
+                        if (index < 9)
+                        {
+                            points = pointsForPlacements[index - 1];
+                        }
+                        else
+                        {
+                            points = 0;
+                        }
+
+                        returnString += "\n" + season.Events[i].Name + " - " + index + " (" + points + "pts)";
                         break;
                     }
                 }
