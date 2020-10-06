@@ -40,7 +40,7 @@ Ensimmäisen kisan jälkeen | Kolmannen kisan jälkeen
 
 Kaudesta voi saada tarkempia tietoja monin eri tavoin. *GetSeasonStandings* palauttaa kilpailijoiden pistetaiston tämän hetkisen tilanteen ja *CompareDrivers* palauttaa vertailun kahdesta kuljettajasta. *GetDriverStandings* -funktio kertoo käyttäjälle yksittäisen kuljettajan meneystyksen aiemmissa tapahtumissa.
 
-*GetSeasonStandings* | *CompareDrivers* | *GetDriverStandings*
+*GetDriverStandings* | *CompareDrivers* | *GetSeasonStandings*
 ------------ | ------------- | -------------
 ![Standings1](ASG-images/DriverStandings%20screenshot.png) | ![Standings2](ASG-images/CompareDrivers%20screenshot.png) | ![Standings3](ASG-images/Standings%20screenshot.png)
 
