@@ -1,5 +1,6 @@
 ## ASG-Leaderboard-Project
-A fictional leaderboard for a racing season
+
+####  Tekijät: __Samuli Salin, Teemu Pullinen, Arttu Salin__
 
 
 # Moottoriurheiluun soveltuva leaderboardsimulaatio- toteutus MongoDB:n avulla
@@ -25,29 +26,42 @@ Projektimme rakenne koostuu kahdesta erillisestä osasta: kehittäjille tarkoite
   * Ei kykyä muokata kausien sisältöä.
   * Helposti luettavat tekstitulostukset.
 
+![Tiedostorakenne](ASG-images/Image1.png)
+
 Käyttäjän kannattaa aloittaa luomalla kausi *CreateSeason* -kutsulla. Tässä vaiheessa kaudelle annetaan pelkkä nimi, kaikki muu lisätään myöhemmin.
 
 Tämän jälkeen pelaaja voi lisätä luotuun kauteen tapahtumia ja kuljettajia. Luotuaan kauden jossa on tapahtumia ja kuljettajia, voi käyttäjä hyödyntää simulaatiokutsuja. *SimulateNextSeason* simuloi odotetusti vain seuraavan kilpailun, kun taas *SimulateRestOfTheSeason* simuloi kaikki jäljellä olevat loppukauden tapahtumat.
 
 *SimulateNextEvent* -toteutuksessa, koodi arpoo tapahtuman lopputuloksen ja pisteyttää jokaisen kuljettajan sen mukaisesti. Tämän jälkeen tulokset lisätään koko kauden tulokset sisältävään listaan ja tulokset päivitetään tietokantaan.
 
-### __*----TÄHÄN KUVIA----*__
+Ensimmäisen kisan jälkeen | Kolmannen kisan jälkeen
+------------ | -------------
+![Simulate1](ASG-images/Simulate%20screenshot.png) | ![Simulate1](ASG-images/Simulate2%20screenshot.png)
 
-Kaudesta voi saada tarkempia tietoja monin eri tavoin. *GetDriverStandings* palauttaa kilpailijoiden pistetaiston tämän hetkisen tilanteen ja *CompareDrivers* palauttaa vertailun kahdesta kuljettajasta.
+Kaudesta voi saada tarkempia tietoja monin eri tavoin. *GetSeasonStandings* palauttaa kilpailijoiden pistetaiston tämän hetkisen tilanteen ja *CompareDrivers* palauttaa vertailun kahdesta kuljettajasta. *GetDriverStandings* -funktio kertoo käyttäjälle yksittäisen kuljettajan meneystyksen aiemmissa tapahtumissa.
 
-### __*----TÄHÄN KUVIA----*__
+*GetSeasonStandings* | *CompareDrivers* | *GetDriverStandings*
+------------ | ------------- | -------------
+![Standings1](ASG-images/DriverStandings%20screenshot.png) | ![Standings2](ASG-images/CompareDrivers%20screenshot.png) | ![Standings3](ASG-images/Standings%20screenshot.png)
 
 Osuvasti nimetyt *NextEvent* ja *LastEvent* palauttavat keskeneräisen kauden seuraavan ja aiemman kilpailun tiedot. Myös tietyn kilpailun lopputulokset voi tarkistaa *GetEventStandings* -pyynnöllä.
+
+*NextEvent* | *LastEvent* | *GetEventStandings*
+------------ | ------------- | -------------
+![NextEvent](ASG-images/NextEvent%20screenshot.png) | ![LastEvent](ASG-images/LastEvent%20screenshot.png) | ![GetEventStandings](ASG-images/EventStandings%20screenshot.png)
 
 ### Virheet: Niiden käsittely ja torjunta
 
 Projektin toteutuksessa huomioimme kaikki mahdolliset virhetilanteet. __Tätä varten rakensimme omia mukautettuja poikkeuksia (exception) ja oman väliohjelmiston (middleware) hoitamaan virheiden nappaamisen__. Mukautettuja poikkeuksia ovat:
 * ##### NotFoundException
   * Käsittelee poikkeukset kun haettua kautta tai tapahtumaa ei löydy.
+  * ![NotFoundException](ASG-images/NotFoundException%20screenshot.png)
 * ##### OutOfRangeException
   * Käsittelee poikkeukset, joissa käyttäjä yrittää hakea indeksiä, joka on hakualueen ulkopuolella. Tämä tapahtuu esimerkiksi kun yritetään simuloida kautta jossa ei ole enää tapahtumia jäljellä.
+  * ![OutOfRangeException](ASG-images/OutofRangeException%20screenshot.png)
 * ##### SeasonStartedException
   * Käsittelee poikkeukset, kun käyttäjä yrittää muokata käynnissä olevaa kautta.
+  * ![SeasonStartedException](ASG-images/SeasonStartedException%20screenshot.png)
 
 Virheet jäävät kiinni *ExceptionHandlingMiddleware* -nimiseen väliohjelmistoon, jonka tehtävänä virheiden kiinniottaminen ja niiden käsittely.
 
@@ -56,3 +70,4 @@ Käyttäjän luodessa uusia kausia, tapahtumia ja ajajia, pyrimme varmistamaan o
 
 ### Loppusanat
 
+Kaiken kaikkiaan projekti ja sen toteutus meni hyvin. Mielestämme kurssi antoi hyvät valmiudet projektin työstämiseen, joskin tähän saattaa vaikuttaa valitsemamme projektin aiheen ja varsinainen kurssimateriaalin samankaltaisuus. Loppujen lopuksi olemme tyytyväisiä tuotokseemme, ottaen huomioon ajalliset rajoitukset ja ryhmän jäsenien kokemattomuuden aihealueen parissa.
