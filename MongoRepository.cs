@@ -272,32 +272,34 @@ namespace ASG_Leaderboard_Project
 
 
         // Returns current standings of the season
-        public async Task<List<string>> GetSeasonStandings(Guid seasonId)
+        public async Task<string> GetSeasonStandings(Guid seasonId)
         {
             var season = await GetSeason(seasonId);
             var standingsList = season.Standings;
-            List<string> finalList = new List<string>();
+            string returnString = "";
+            returnString += "After " + season.CurrentEventIndex + " events, the season standings are as follows:\n";
 
             standingsList.Sort((x, y) => x.Value.CompareTo(y.Value));
             standingsList.Reverse();
 
             foreach (var item in standingsList)
             {
-                string tempString = item.Key.Name + ": " + item.Value.ToString();
-                finalList.Add(tempString);
+                returnString += "\n" + item.Key.Name + ": " + item.Value.ToString() + "pts";
             }
 
-            return finalList;
+            return returnString;
         }
 
 
 
         // Returns current standings of the event
-        public async Task<List<string>> GetEventStandings(Guid seasonId, Guid eventId)
+        public async Task<string> GetEventStandings(Guid seasonId, Guid eventId)
         {
 
             var tempEvent = await GetSeasonEvent(seasonId, eventId);
             var standingsList = tempEvent.Standings;
+            string returnString = "";
+            returnString += tempEvent.Name + " results were:\n";
             List<string> finalList = new List<string>();
 
             standingsList.Sort((x, y) => x.Value.CompareTo(y.Value));
@@ -305,11 +307,11 @@ namespace ASG_Leaderboard_Project
 
             foreach (var item in standingsList)
             {
-                string tempString = item.Key.Name + ": " + item.Value.ToString();
-                finalList.Add(tempString);
+                returnString += "\n" + item.Key.Name + ": " + item.Value.ToString() + "pts";
+                finalList.Add(returnString);
             }
 
-            return finalList;
+            return returnString;
         }
 
         // Returns information from the last event
@@ -318,7 +320,7 @@ namespace ASG_Leaderboard_Project
             int sija = 0;
             string list = "";
             int lastEventIndex = await GetCurrentEventIndex(id) - 1;
-            if (lastEventIndex < 1)
+            if (lastEventIndex < 0)
             {
                 //error tähän, ei aiempia kilpailuita
                 throw new NotFoundException("Last Event not found!");
@@ -344,11 +346,12 @@ namespace ASG_Leaderboard_Project
         {
             Season tmpSeason = await GetSeason(seasonId);
             int nextEventIndex = await GetCurrentEventIndex(seasonId);
-            string tempString;
+            string tempString = "";
+            tempString += "The next event of the season is:\n\n";
             if (nextEventIndex < tmpSeason.Events.Count)
             {
                 var tmpEvent = tmpSeason.Events[nextEventIndex];
-                tempString = tmpEvent.Name + "\nTrack: " + tmpEvent.Track.Name + "  " + tmpEvent.Track.Country + "\nDate: " + tmpEvent.Date.ToString();
+                tempString += tmpEvent.Name + "\nTrack: " + tmpEvent.Track.Name + " (" + tmpEvent.Track.Country + ")\nDate: " + tmpEvent.Date.ToString();
             }
             else { throw new OutOfRangeException("Season has already ended!"); }
 
